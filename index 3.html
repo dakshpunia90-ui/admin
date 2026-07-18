@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Heaven Moringa</title>
+    <style>
+        :root { --sidebar-bg: #1a5632; --primary: #2e8b57; --main-bg: #f4f6f8; --danger: #e53e3e; --accent: #d4af37;}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; height: 100vh; background: var(--main-bg); overflow: hidden;}
+        
+        #loginView { position:fixed; width:100vw; height:100vh; background:var(--sidebar-bg); display:flex; justify-content:center; align-items:center; z-index: 100;}
+        .login-box { background: white; padding: 3rem; border-radius: 12px; text-align:center; width:350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);}
+        input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 1.5rem; border: 1px solid #ccc; border-radius: 4px; outline:none; transition: border 0.3s; }
+        input:focus, textarea:focus { border-color: var(--primary); }
+        button { width: 100%; background: var(--accent); color: white; padding: 0.8rem; border: none; cursor: pointer; border-radius:4px; font-weight:bold; transition: background 0.3s;}
+        button:hover { background: #b8962c; }
+        
+        #dashboard { display: none; width: 100%; height: 100%; }
+        .sidebar { width: 250px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; }
+        .sidebar h2 { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .main-content { flex-grow: 1; padding: 2rem; overflow-y: auto; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--accent); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;}
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card h3 { color: #666; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 5px;}
+        .stat-card h2 { font-size: 2rem; color: var(--sidebar-bg); }
+
+        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee; margin-bottom:2rem;}
+        
+        .order-card { border: 1px solid #ddd; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; background: #fff;}
+        .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; align-items: center;}
+        
+        .product-list-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .product-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-right: 10px; vertical-align: middle; }
+        
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 1rem; border-radius: 4px; z-index: 9999; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loginView">
+        <div class="login-box">
+            <h2 style="color: var(--sidebar-bg); margin-bottom: 5px;">HQ Admin Login</h2>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:1.5rem;">Fast Secure Access.</p>
+            <form id="adminForm" onsubmit="event.preventDefault();">
+                <input type="email" id="admEmail" placeholder="Master Admin Email">
+                <button type="button" id="admBtn">Unlock Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard">
+        <div class="sidebar">
+            <h2>HQ Control Panel</h2>
+            <button id="logoutBtn" style="background:var(--danger); color:white; margin:auto 1rem 1rem;">Lock System</button>
+        </div>
+        
+        <div class="main-content">
+            <h1 style="margin-bottom: 2rem; color: var(--sidebar-bg);">Business Analytics</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Revenue</h3>
+                    <h2 id="statRevenue">₹0</h2>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Orders</h3>
+                    <h2 id="statOrders">0</h2>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--primary);">
+                    <h3>Total Products</h3>
+                    <h2 id="statProducts">0</h2>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div>
+                    <div class="card">
+                        <h3>➕ Add Store Product</h3>
+                        <div style="margin-top:1rem;">
+                            <input type="text" id="pName" placeholder="Product Name">
+                            <input type="number" id="pPrice" placeholder="Price in ₹">
+                            <input type="text" id="pImage" placeholder="Image URL (https://...)">
+                            <select id="pIcon" style="margin-bottom: 1rem; width: 100%; padding: 0.8rem;">
+                                <option value="🌿">🌿 Powder / Leaves</option>
+                                <option value="🍵">🍵 Teas</option>
+                                <option value="💊">💊 Capsules</option>
+                                <option value="💧">💧 Oils</option>
+                            </select>
+                            <textarea id="pDesc" placeholder="Product Description..." rows="3"></textarea>
+                            <button type="button" id="addProdBtn" style="background: var(--primary);">Deploy to Live Website</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📋 Current Catalog</h3>
+                        <div id="adminProductsList" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card" style="min-height: 600px;">
+                        <h3 style="color:var(--primary); margin-bottom:1rem;">🚚 Order Fulfillment Hub</h3>
+                        <div id="ordersContainer">Loading orders...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastMessage" class="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const app = initializeApp({
+            apiKey: "AIzaSyDSotV0jSZXSaDElmVVCoR1cgagcxYO6DQ",
+            authDomain: "heaven-moringa.firebaseapp.com",
+            projectId: "heaven-moringa"
+        });
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const MASTER_EMAIL = "dakshpunia03@gmail.com";
+
+        window.showToast = (msg) => { 
+            const t = document.getElementById('toastMessage'); 
+            t.innerText = msg; t.style.display = 'block'; 
+            setTimeout(() => t.style.display = 'none', 3000); 
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.email === MASTER_EMAIL) {
+                document.getElementById('loginView').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+            } else {
+                if(user) signOut(auth);
+                document.getElementById('loginView').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+            }
+        });
+
+        document.getElementById('admBtn').addEventListener('click', async () => {
+            const email = document.getElementById('admEmail').value;
+            const autoPassword = "121212"; 
+            if(!email) return window.showToast("Please enter your admin email.");
+            document.getElementById('admBtn').innerText = "Unlocking...";
+            try { 
+                await signInWithEmailAndPassword(auth, email, autoPassword); 
+            } 
+            catch(e) { 
+                window.showToast("Access Denied."); 
+                document.getElementById('admBtn').innerText = "Unlock Dashboard";
+            }
+        });
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+        // Manage Orders
+        onSnapshot(collection(db, "orders"), (snap) => {
+            let html = '';
+            let totalRevenue = 0;
+            let orderCount = 0;
+
+            snap.forEach(docSnap => {
+                const order = docSnap.data();
+                const id = docSnap.id;
+                
+                totalRevenue += (order.totalPaid || 0);
+                orderCount++;
+
+                html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <strong>#${order.orderID} - ₹${order.totalPaid} (${order.paymentMethod})</strong>
+                            <select onchange="window.updateStatus('${id}', this.value)" style="width:130px; margin:0; padding:5px;">
+                                <option value="Processing" ${order.status==='Processing'?'selected':''}>Processing</option>
+                                <option value="Shipped" ${order.status==='Shipped'?'selected':''}>Shipped</option>
+                                <option value="Delivered" ${order.status==='Delivered'?'selected':''}>Delivered</option>
+                            </select>
+                        </div>
+                        <p style="font-size:0.9rem;"><strong>To:</strong> ${order.shippingName} <br><strong>Email:</strong> ${order.customerEmail} <br><strong>Phone:</strong> ${order.shippingPhone}</p>
+                        <p style="font-size:0.85rem; margin-top:5px; background:#f4f4f4; padding:5px;">${order.shippingAddress}</p>
+                        <p style="font-size:0.9rem; margin-top:10px; color:var(--primary); font-weight:bold;">Items: ${order.items.map(i=>i.name).join(', ')}</p>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('statRevenue').innerText = `₹${totalRevenue}`;
+            document.getElementById('statOrders').innerText = orderCount;
+            document.getElementById('ordersContainer').innerHTML = html || '<p>No orders yet.</p>';
+        });
+
+        window.updateStatus = async (orderId, newStatus) => {
+            try { await updateDoc(doc(db, "orders", orderId), { status: newStatus }); window.showToast("Order updated!"); } 
+            catch(e) { window.showToast("Failed to update."); }
+        };
+
+        // Manage Products
+        document.getElementById('addProdBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('addProdBtn');
+            btn.innerText = "Deploying...";
+            try {
+                await addDoc(collection(db, "products"), {
+                    name: document.getElementById('pName').value,
+                    price: parseFloat(document.getElementById('pPrice').value),
+                    image: document.getElementById('pImage').value || '', // SAVING IMAGE URL
+                    icon: document.getElementById('pIcon').value,
+                    description: document.getElementById('pDesc').value,
+                    timestamp: new Date()
+                });
+                document.getElementById('pName').value = '';
+                document.getElementById('pPrice').value = '';
+                document.getElementById('pImage').value = '';
+                document.getElementById('pDesc').value = '';
+                window.showToast("Product Live!");
+            } catch(e) { window.showToast("Failed to add product."); }
+            btn.innerText = "Deploy to Live Website";
+        });
+
+        onSnapshot(collection(db, "products"), (snap) => {
+            let html = '';
+            let prodCount = 0;
+            snap.forEach(docSnap => {
+                const prod = docSnap.data();
+                prodCount++;
+                const imgTag = prod.image ? `<img src="${prod.image}" class="product-thumb">` : `<span style="font-size:1.5rem; margin-right:10px;">${prod.icon}</span>`;
+                
+                html += `
+                    <div class="product-list-item">
+                        <div style="display:flex; align-items:center;">
+                            ${imgTag}
+                            <span style="font-size: 0.9rem;"><strong>${prod.name}</strong> (₹${prod.price})</span>
+                        </div>
+                        <button onclick="window.deleteProduct('${docSnap.id}')" style="background:var(--danger); color:white; width:auto; padding:0.3rem 0.6rem; font-size:0.8rem; border:none; border-radius:4px; cursor:pointer;">Delete</button>
+                    </div>
+                `;
+            });
+            document.getElementById('statProducts').innerText = prodCount;
+            document.getElementById('adminProductsList').innerHTML = html || '<p>No products in store.</p>';
+        });
+
+        window.deleteProduct = async (id) => {
+            if(confirm("Remove this product?")) await deleteDoc(doc(db, "products", id));
+        }
+    </script>
+</body>
+</html>
